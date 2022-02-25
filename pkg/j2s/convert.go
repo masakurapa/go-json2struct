@@ -14,7 +14,10 @@ var (
 	link = regexp.MustCompile("(^[A-Za-z])|_([A-Za-z])|-([A-Za-z])")
 )
 
-func Format(s string) (string, error) {
+// Convert returns a string that converts a JSON string into a Go structure.
+//
+// return an error if the string is invalid as JSON.
+func Convert(s string) (string, error) {
 	var val interface{}
 	if err := json.Unmarshal([]byte(s), &val); err != nil {
 		// if you only have a string like "hoge", you will get an error here.
@@ -71,6 +74,7 @@ func (c *converter) getNumberTyp(v float64) string {
 	}
 	return "float64"
 }
+
 func (c *converter) getStructType(no int, v map[string]interface{}) string {
 	buf := bytes.Buffer{}
 	buf.WriteString("struct {\n")

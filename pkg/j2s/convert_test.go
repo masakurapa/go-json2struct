@@ -7,7 +7,7 @@ import (
 	"github.com/masakurapa/go-json2struct/pkg/j2s"
 )
 
-func TestFormat(t *testing.T) {
+func TestConvert(t *testing.T) {
 	testCases := []struct {
 		name     string
 		s        string
@@ -188,11 +188,11 @@ func TestFormat(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual, err := j2s.Format(tc.s)
+			actual, err := j2s.Convert(tc.s)
 
 			if err == nil && tc.err == nil {
 				if actual != tc.expected {
-					t.Errorf("Format() returns: \n%v\nwant: \n%v", actual, tc.expected)
+					t.Errorf("Convert() returns: \n%v\nwant: \n%v", actual, tc.expected)
 				}
 				return
 			}

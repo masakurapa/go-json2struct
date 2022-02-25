@@ -6,7 +6,7 @@ import (
 	"github.com/masakurapa/go-json2struct/pkg/j2s"
 )
 
-func BenchmarkFormat(b *testing.B) {
+func BenchmarkConvert(b *testing.B) {
 	input := `{
 		"key1": "aaaaa",
 		"key2": 12345,
@@ -17,7 +17,7 @@ func BenchmarkFormat(b *testing.B) {
 	}`
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := j2s.Format(input)
+		_, err := j2s.Convert(input)
 		if err != nil {
 			b.Fatal(err)
 		}

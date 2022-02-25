@@ -9,13 +9,13 @@ import (
 
 func main() {
 	ch := make(chan struct{})
-	js.Global().Set("format", js.FuncOf(format))
+	js.Global().Set("json2struct", js.FuncOf(json2struct))
 	<-ch
 }
 
-func format(js.Value, []js.Value) interface{} {
+func json2struct(js.Value, []js.Value) interface{} {
 	input := js.Global().Get("document").Call("getElementById", "input").Get("value").String()
-	output, err := j2s.Format(input)
+	output, err := j2s.Convert(input)
 	if err != nil {
 		fmt.Println(err)
 	}

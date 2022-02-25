@@ -90,12 +90,21 @@ func TestFormat(t *testing.T) {
 }`,
 		},
 		{
-			name: "struct - float value",
+			name: "struct - float value1",
 			s:    `{"test":123.456}`,
 			expected: `type J2S1 struct {
 	Test float64 ` + "`json:\"test\"`" + `
 }`,
 		},
+
+		// FIXME: need to fix the bug with the int type.
+		// 		{
+		// 			name: "struct - float value2",
+		// 			s:    `{"test":123.000}`,
+		// 			expected: `type J2S1 struct {
+		// 	Test float64 ` + "`json:\"test\"`" + `
+		// }`,
+		// 		},
 		{
 			name: "struct - bool value",
 			s:    `{"test":true}`,

@@ -1,24 +1,13 @@
 package j2s
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"go/format"
 	"regexp"
 	"strconv"
 	"strings"
-)
-
-const (
-	typeName          = "J2S%d"
-	typeFormat        = "type " + typeName + " %s"
-	structFieldFormat = "%s %s `json:\"%s\"`\n"
-
-	boolType      = "bool"
-	intType       = "int"
-	floatType     = "float64"
-	stringType    = "string"
-	interfaceType = "interface{}"
 )
 
 var (
@@ -61,9 +50,9 @@ func (c *converter) appendTypes(no int, v interface{}) {
 func (c *converter) getType(no int, v interface{}) string {
 	switch vv := v.(type) {
 	case bool:
-		return boolType
+		return "bool"
 	case string:
-		return stringType
+		return "string"
 	case float64:
 		return c.getNumberTyp(vv)
 	case map[string]interface{}:
@@ -71,16 +60,54 @@ func (c *converter) getType(no int, v interface{}) string {
 	case []interface{}:
 		return c.getSliceType(no, vv)
 	}
-	return interfaceType
+	return "interface{}"
 }
 
 func (c *converter) getNumberTyp(v float64) string {
 	// TODO: there has to be a better way
 	s := strconv.FormatFloat(v, 'f', -1, 64)
 	if !strings.Contains(s, ".") {
-		return intType
+		return "int"
 	}
-	return floatType
+	return "float64"
+}
+func (c *converter) getStructType(no int, v map[string]interface{}) string {
+	buf := bytes.Buffer{}
+	buf.WriteString("struct {\n")
+
+	for key, val := range v {
+		buf.WriteString(c.structField(key) + " " + c.getType(no, val))
+		buf.WriteString(" `json:\"" + key + "\"`")
+		buf.WriteString("\n")
+	}
+
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *converter) structField(s string) string {
+	return link.ReplaceAllStringFunc(s, func(s string) string {
+		ss := strings.Replace(strings.Replace(s, "_", "", -1), "-", "", -1)
+		return strings.ToUpper(ss)
+	})
+}
+
+func (c *converter) getSliceType(no int, v []interface{}) string {
+	ret := ""
+	for _, vv := range v {
+		t := c.getType(no, vv)
+
+		if ret == "" {
+			ret = t
+			continue
+		}
+
+		if ret != t {
+			ret = "interface{}"
+			break
+		}
+	}
+	return "[]" + ret
 }
 
 func (c *converter) toString() (string, error) {
@@ -89,7 +116,7 @@ func (c *converter) toString() (string, error) {
 		codes[ti.no-1] = ti.code
 	}
 
-	code := strings.TrimSpace(strings.Join(codes, "\n\n"))
+	code := strings.Join(codes, "\n\n")
 	b, err := format.Source([]byte(code))
 	if err != nil {
 		return "", errors.New("code format error: " + err.Error())

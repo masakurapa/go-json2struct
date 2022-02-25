@@ -17,6 +17,9 @@ func BenchmarkFormat(b *testing.B) {
 	}`
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		j2s.Format(input)
+		_, err := j2s.Format(input)
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }

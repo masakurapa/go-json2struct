@@ -3,3 +3,9 @@ build_wasm:
 
 serv:
 	cd cmd/server; go run server.go
+
+test_pkg:
+	go test ./pkg/...
+
+bench:
+	cd ./pkg/j2s; go test -bench . -benchmem

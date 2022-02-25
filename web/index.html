@@ -1,6 +1,7 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <title>JSON to Go Struct</title>
     <script src="wasm_exec.js"></script>
     <script>
       const go = new Go();
@@ -8,9 +9,60 @@
           go.run(result.instance);
       });
     </script>
+    <style>
+      .contents {
+        padding: 8px 16px 32px 16px;
+      }
+      .buttons {
+        margin-bottom: 12px;
+      }
+
+      textarea {
+        width: 100%;
+        resize: vertical;
+        padding: 8px;
+        border: 1px solid black;
+      }
+      textarea:disabled {
+        border: 1px solid black;
+      }
+
+      #input {
+        background-color: #ffffdd;
+        border-radius: 4px 4px 0 0;
+      }
+      #output {
+        background-color: #f7f9fa;
+        border-radius: 0 0 4px 4px;
+        border-top: 0;
+      }
+    </style>
   </head>
   <body>
+    <header>
+      <h3>JSON to Go Struct</h3>
+    </header>
 
-    <button onClick="console.log(format('[]'))">button</button>
+    <div class="contents">
+      <div class="buttons">
+        <button onClick="json2struct()">Convert</button>
+      </div>
+
+      <div class="code">
+        <textarea id="input" rows="10"></textarea>
+      </div>
+
+      <div class="code">
+        <textarea id="output" rows="20" disabled></textarea>
+      </div>
+    </div>
+
+    <!-- <div class="content description">
+      About j2s
+    </div>
+
+    <footer>
+      footer
+    </footer> -->
   </body>
 </html>

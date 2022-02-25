@@ -14,3 +14,5 @@ main.wasm
 
 # Dependency directories (remove the comment below to include it)
 dist/
+
+.idea

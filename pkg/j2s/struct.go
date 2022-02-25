@@ -1,14 +1,15 @@
 package j2s
 
 import (
-	"fmt"
 	"strings"
 )
 
 func (c *converter) getStructType(no int, v map[string]interface{}) string {
 	fields := make([]string, 0, len(v))
 	for key, val := range v {
-		fields = append(fields, fmt.Sprintf(structFieldFormat, c.structField(key), c.getType(no, val), key))
+		field := c.structField(key) + " " + c.getType(no, val)
+		field += " `json:\"" + key + "\"`"
+		fields = append(fields, field)
 	}
 	return "struct {\n" + strings.Join(fields, "\n") + "}"
 }

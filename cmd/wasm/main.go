@@ -15,6 +15,10 @@ func main() {
 
 func json2struct(js.Value, []js.Value) interface{} {
 	input := js.Global().Get("document").Call("getElementById", "input").Get("value").String()
+	if input == "" {
+		// if there is no input, output samples with placeholder value
+		input = `{"sample":"paste the json here"}`
+	}
 	output, err := j2s.Convert(input)
 	if err != nil {
 		js.Global().Get("document").Call("getElementById", "output").Set("value", err.Error())

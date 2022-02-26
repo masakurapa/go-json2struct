@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+const (
+	firstNo = 1
+)
+
 var (
 	link = regexp.MustCompile("(^[A-Za-z])|_([A-Za-z])|-([A-Za-z])")
 )
@@ -31,23 +35,28 @@ func Convert(s string) (string, error) {
 type converter struct {
 	types []typeInfo
 }
+
 type typeInfo struct {
 	no   int
 	code string
 }
 
 func (c *converter) toStruct(v interface{}) (string, error) {
-	c.appendTypes(1, v)
+	c.appendTypes(firstNo, v)
 	return c.toString()
+}
+
+func (c *converter) append(no int, code string) {
+	c.types = append(c.types, typeInfo{
+		no:   no,
+		code: code,
+	})
 }
 
 func (c *converter) appendTypes(no int, v interface{}) {
 	typeName := c.getType(no, v)
 	code := "type J2S" + strconv.Itoa(no) + " " + typeName
-	c.types = append(c.types, typeInfo{
-		no:   no,
-		code: code,
-	})
+	c.append(no, code)
 }
 
 func (c *converter) getType(no int, v interface{}) string {
@@ -80,7 +89,14 @@ func (c *converter) getStructType(no int, v map[string]interface{}) string {
 	buf.WriteString("struct {\n")
 
 	for key, val := range v {
-		buf.WriteString(c.structField(key) + " " + c.getType(no, val))
+		nextNo := no + 1
+		typeStr := c.getType(nextNo, val)
+		if strings.HasPrefix(typeStr, "struct {") {
+			structName := "J2S" + strconv.Itoa(nextNo)
+			c.append(nextNo, "type "+structName+" "+typeStr)
+			typeStr = structName
+		}
+		buf.WriteString(c.structField(key) + " " + typeStr)
 		buf.WriteString(" `json:\"" + key + "\"`")
 		buf.WriteString("\n")
 	}

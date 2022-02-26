@@ -156,34 +156,32 @@ func TestConvert(t *testing.T) {
 }`,
 		},
 
-		/*
 					{
 						name: "struct - map value",
 						s:    `{"test":{"hoge":"fuga"}}`,
 						expected: `type J2S1 struct {
-				Test J2S2 ` + "`json:\"test\"`" + `
-			}
+	Test J2S2 ` + "`json:\"test\"`" + `
+}
 
-			type J2S2 struct {
-				Hoge string ` + "`json:\"hoge\"`" + `
-			}`,
+type J2S2 struct {
+	Hoge string ` + "`json:\"hoge\"`" + `
+}`,
 					},
 					{
 						name: "struct - nested map value",
 						s:    `{"test":{"hoge":{"fuga":"12345"}}}`,
 						expected: `type J2S1 struct {
-				Test J2S2 ` + "`json:\"test\"`" + `
-			}
+	Test J2S2 ` + "`json:\"test\"`" + `
+}
 
-			type J2S2 struct {
-				Hoge J2S3 ` + "`json:\"hoge\"`" + `
-			}
+type J2S2 struct {
+	Hoge J2S3 ` + "`json:\"hoge\"`" + `
+}
 
-			type J2S3 struct {
-				Fuga string ` + "`json:\"fuga\"`" + `
-			}`,
+type J2S3 struct {
+	Fuga string ` + "`json:\"fuga\"`" + `
+}`,
 					},
-		*/
 	}
 
 	for _, tc := range testCases {

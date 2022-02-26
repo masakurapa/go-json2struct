@@ -113,9 +113,25 @@ func (c *converter) structField(s string) string {
 }
 
 func (c *converter) getSliceType(no int, v []interface{}) string {
+	if len(v) == 0 {
+		return "[]interface{}"
+	}
+
 	ret := ""
 	for _, vv := range v {
-		t := c.getType(no, vv)
+		t := "interface{}"
+		switch vvv := vv.(type) {
+		case bool:
+			t = "bool"
+		case string:
+			t = "string"
+		case float64:
+			t = c.getNumberTyp(vvv)
+		case map[string]interface{}:
+			t = "map[string]interface{}"
+		case []interface{}:
+			t = "[]interface{}"
+		}
 
 		if ret == "" {
 			ret = t

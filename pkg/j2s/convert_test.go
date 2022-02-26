@@ -156,21 +156,21 @@ func TestConvert(t *testing.T) {
 }`,
 		},
 
-					{
-						name: "struct - map value",
-						s:    `{"test":{"hoge":"fuga"}}`,
-						expected: `type J2S1 struct {
+		{
+			name: "struct - map value",
+			s:    `{"test":{"hoge":"fuga"}}`,
+			expected: `type J2S1 struct {
 	Test J2S2 ` + "`json:\"test\"`" + `
 }
 
 type J2S2 struct {
 	Hoge string ` + "`json:\"hoge\"`" + `
 }`,
-					},
-					{
-						name: "struct - nested map value",
-						s:    `{"test":{"hoge":{"fuga":"12345"}}}`,
-						expected: `type J2S1 struct {
+		},
+		{
+			name: "struct - nested map value",
+			s:    `{"test":{"hoge":{"fuga":"12345"}}}`,
+			expected: `type J2S1 struct {
 	Test J2S2 ` + "`json:\"test\"`" + `
 }
 
@@ -181,7 +181,33 @@ type J2S2 struct {
 type J2S3 struct {
 	Fuga string ` + "`json:\"fuga\"`" + `
 }`,
-					},
+		},
+
+		{
+			name:     "slice - empty",
+			s:        `[]`,
+			expected: `type J2S1 []interface{}`,
+		},
+		{
+			name:     "slice - null value",
+			s:        `[null, null, null]`,
+			expected: `type J2S1 []interface{}`,
+		},
+		{
+			name:     "slice - string value",
+			s:        `["1", "2", "3"]`,
+			expected: `type J2S1 []string`,
+		},
+		{
+			name:     "slice - int value",
+			s:        `[1, 2, 3]`,
+			expected: `type J2S1 []int`,
+		},
+		{
+			name:     "slice - float value",
+			s:        `[1.1, 2.2, 3.3]`,
+			expected: `type J2S1 []float64`,
+		},
 	}
 
 	for _, tc := range testCases {

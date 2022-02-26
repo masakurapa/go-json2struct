@@ -9,12 +9,40 @@
           go.run(result.instance);
       });
     </script>
+    <script src="https://kit.fontawesome.com/4e4a01a531.js"></script>
+
     <style>
+      body {
+        margin: 0;
+      }
+
+      header {
+        background-color: #659AD2;
+        padding: 4px 0 4px 16px;
+        color: #FFFFFF;
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+
       .contents {
-        padding: 8px 16px 32px 16px;
+        padding: 8px 24px 32px 24px;
       }
       .buttons {
-        margin-bottom: 12px;
+        margin-top: 8px;
+        margin-bottom: 16px;
+      }
+
+      button {
+        height: 32px;
+        border-radius: 4px;
+        margin-right: 16px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      #convert-btn {
+        background-color: #3388FF;
+        color: #FFFFFF;
+        width: 160px;
       }
 
       textarea {
@@ -36,21 +64,37 @@
         border-radius: 0 0 4px 4px;
         border-top: 0;
       }
+
+      footer {
+        margin-top: auto;
+        background-color: #659AD2;
+        text-align: center;
+        padding: 8px 0;
+        bottom: 0;
+      }
+
+      .copyright {
+        color: #fff;
+      }
+
+      .footer-link i {
+        position: relative;
+        top: 5px;
+        right: 5px;
+      }
     </style>
   </head>
   <body>
-    <header>
-      <h3>JSON to Go Struct (beta)</h3>
-    </header>
+    <header>JSON to Go Struct</header>
 
     <div class="contents">
       <div class="buttons">
-        <button onClick="json2struct()">Convert</button>
+        <button id="convert-btn" onClick="json2struct()">Convert</button>
         <button onClick="copyClipboard()">Copy</button>
       </div>
 
       <div class="code">
-        <textarea id="input" rows="10"></textarea>
+        <textarea id="input" rows="10" placeholder='{"sample":"paste the json here"}'></textarea>
       </div>
 
       <div class="code">
@@ -61,9 +105,15 @@
     <!-- <div class="content description">
       About j2s
     </div>
+    -->
 
     <footer>
-      footer
-    </footer> -->
+      <div class="copyright">©2022 JSON to Go Struct</div>
+      <div class="footer-link">
+          <a href="https://github.com/masakurapa/go-json2struct" target="_blank">
+              <i class="fab fa-github-square" style="color: black; font-size: 1.5em;" aria-hidden="true"></i>GitHub
+          </a>
+      </div>
+    </footer>
   </body>
 </html>

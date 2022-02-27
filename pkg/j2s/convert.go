@@ -6,6 +6,7 @@ import (
 	"errors"
 	"go/format"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -85,12 +86,21 @@ func (c *converter) getNumberTyp(v float64) string {
 }
 
 func (c *converter) getStructType(no int, v map[string]interface{}) string {
+	// sort by key name in asc
+	keys := make([]string, 0, len(v))
+	for key := range v {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+
 	buf := bytes.Buffer{}
 	buf.WriteString("struct {\n")
 
-	for key, val := range v {
+	for _, key := range keys {
 		nextNo := no + 1
-		typeStr := c.getType(nextNo, val)
+		typeStr := c.getType(nextNo, v[key])
 		if strings.HasPrefix(typeStr, "struct {") {
 			structName := "J2S" + strconv.Itoa(nextNo)
 			c.append(nextNo, "type "+structName+" "+typeStr)

@@ -208,6 +208,15 @@ type J2S3 struct {
 			s:        `[1.1, 2.2, 3.3]`,
 			expected: `type J2S1 []float64`,
 		},
+		{
+			name: "slice - map value",
+			s:    `[{"test":"1"}]`,
+			expected: `type J2S1 []J2S2
+
+type J2S2 struct {
+	Test string ` + "`json:\"test\"`" + `
+}`,
+		},
 	}
 
 	for _, tc := range testCases {

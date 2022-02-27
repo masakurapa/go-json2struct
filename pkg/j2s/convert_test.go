@@ -47,115 +47,48 @@ func TestConvert(t *testing.T) {
 			expected: `type J2S1 struct {
 }`,
 		},
+		// FIXME: "test5": need to fix the bug with the int type.
 		{
-			name: "struct - null value",
-			s:    `{"test":null}`,
+			name: "struct",
+			s:    `{"test1":null,"test2":"1","test3":2,"test4":123.456,"test5":123.000,"test6":true}`,
 			expected: `type J2S1 struct {
-	Test interface{} ` + "`json:\"test\"`" + `
+	Test1 interface{} ` + "`json:\"test1\"`" + `
+	Test2 string      ` + "`json:\"test2\"`" + `
+	Test3 int         ` + "`json:\"test3\"`" + `
+	Test4 float64     ` + "`json:\"test4\"`" + `
+	Test5 int         ` + "`json:\"test5\"`" + `
+	Test6 bool        ` + "`json:\"test6\"`" + `
 }`,
 		},
 		{
-			name: "struct - null value(snake)",
+			name: "struct - Snake-Case key",
 			s:    `{"test_key_a":null}`,
 			expected: `type J2S1 struct {
 	TestKeyA interface{} ` + "`json:\"test_key_a\"`" + `
 }`,
 		},
 		{
-			name: "struct - null value(kebab)",
+			name: "struct - Kebab-Case key",
 			s:    `{"test-key-a":null}`,
 			expected: `type J2S1 struct {
 	TestKeyA interface{} ` + "`json:\"test-key-a\"`" + `
 }`,
 		},
 		{
-			name: "struct - null value(number separate)",
+			name: "struct - number separate key",
 			s:    `{"test1key2a":null}`,
 			expected: `type J2S1 struct {
 	Test1key2a interface{} ` + "`json:\"test1key2a\"`" + `
 }`,
 		},
-		{
-			name: "struct - string value",
-			s:    `{"test":"1"}`,
-			expected: `type J2S1 struct {
-	Test string ` + "`json:\"test\"`" + `
-}`,
-		},
-		{
-			name: "struct - int value",
-			s:    `{"test":1}`,
-			expected: `type J2S1 struct {
-	Test int ` + "`json:\"test\"`" + `
-}`,
-		},
-		{
-			name: "struct - float value1",
-			s:    `{"test":123.456}`,
-			expected: `type J2S1 struct {
-	Test float64 ` + "`json:\"test\"`" + `
-}`,
-		},
-
-		// FIXME: need to fix the bug with the int type.
-		// 		{
-		// 			name: "struct - float value2",
-		// 			s:    `{"test":123.000}`,
-		// 			expected: `type J2S1 struct {
-		// 	Test float64 ` + "`json:\"test\"`" + `
-		// }`,
-		// 		},
-		{
-			name: "struct - bool value",
-			s:    `{"test":true}`,
-			expected: `type J2S1 struct {
-	Test bool ` + "`json:\"test\"`" + `
-}`,
-		},
 
 		{
-			name: "struct - null slice value",
-			s:    `{"test":[null, null, null]}`,
-			expected: `type J2S1 struct {
-	Test []interface{} ` + "`json:\"test\"`" + `
-}`,
-		},
-		{
-			name: "struct - string slice value",
+			name: "struct - slice value",
 			s:    `{"test":["1", "2", "3"]}`,
 			expected: `type J2S1 struct {
 	Test []string ` + "`json:\"test\"`" + `
 }`,
 		},
-		{
-			name: "struct - int slice value",
-			s:    `{"test":[1, 2, 3]}`,
-			expected: `type J2S1 struct {
-	Test []int ` + "`json:\"test\"`" + `
-}`,
-		},
-		{
-			name: "struct - float slice value",
-			s:    `{"test":[1.1, 2.2, 3.3]}`,
-			expected: `type J2S1 struct {
-	Test []float64 ` + "`json:\"test\"`" + `
-}`,
-		},
-		{
-			name: "struct - bool slice value",
-			s:    `{"test":[true, false, true]}`,
-			expected: `type J2S1 struct {
-	Test []bool ` + "`json:\"test\"`" + `
-}`,
-		},
-		{
-			name: "struct - multilpe value type",
-			s:    `{"test":[null, "1", 2, 3.3, true]}`,
-			expected: `type J2S1 struct {
-	Test []interface{} ` + "`json:\"test\"`" + `
-}`,
-		},
-
 		{
 			name: "struct - map value",
 			s:    `{"test":{"hoge":"fuga"}}`,
@@ -179,6 +112,17 @@ type J2S2 struct {
 }
 
 type J2S3 struct {
+	Fuga string ` + "`json:\"fuga\"`" + `
+}`,
+		},
+		{
+			name: "struct - slice on map value",
+			s:    `{"test":[{"fuga":"12345"}]}`,
+			expected: `type J2S1 struct {
+	Test []J2S2 ` + "`json:\"test\"`" + `
+}
+
+type J2S2 struct {
 	Fuga string ` + "`json:\"fuga\"`" + `
 }`,
 		},

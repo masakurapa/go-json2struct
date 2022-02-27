@@ -138,7 +138,11 @@ func (c *converter) getSliceType(no int, v []interface{}) string {
 		case float64:
 			t = c.getNumberTyp(vvv)
 		case map[string]interface{}:
-			nextNo := no + 1
+			nextNo := no
+			if no == firstNo {
+				nextNo++
+			}
+
 			typeStr := c.getType(nextNo, vvv)
 			structName := "J2S" + strconv.Itoa(nextNo)
 			c.append(nextNo, "type "+structName+" "+typeStr)

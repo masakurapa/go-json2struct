@@ -209,6 +209,16 @@ type J2S3 struct {
 			expected: `type J2S1 []float64`,
 		},
 		{
+			name:     "slice - slice value",
+			s:        `[["1","2"]]`,
+			expected: `type J2S1 [][]string`,
+		},
+		{
+			name:     "slice - slice on slice value",
+			s:        `[[["1","2"]]]`,
+			expected: `type J2S1 [][][]string`,
+		},
+		{
 			name: "slice - map value",
 			s:    `[{"test":"1"}]`,
 			expected: `type J2S1 []J2S2

@@ -135,7 +135,7 @@ func (c *converter) getSliceType(no int, v []interface{}) string {
 
 			t = "J2S" + strconv.Itoa(nextNo)
 		case []interface{}:
-			t = "[]interface{}"
+			t = c.getSliceType(no+1, vvv)
 		}
 
 		if ret == "" {

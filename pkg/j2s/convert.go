@@ -38,26 +38,20 @@ type converter struct {
 }
 
 type typeInfo struct {
-	no   int
-	code string
+	no      int
+	typeStr string
 }
 
 func (c *converter) toStruct(v interface{}) (string, error) {
-	c.appendTypes(firstNo, v)
+	c.append(firstNo, c.getType(firstNo, v))
 	return c.toString()
 }
 
-func (c *converter) append(no int, code string) {
+func (c *converter) append(no int, typeStr string) {
 	c.types = append(c.types, typeInfo{
-		no:   no,
-		code: code,
+		no:      no,
+		typeStr: typeStr,
 	})
-}
-
-func (c *converter) appendTypes(no int, v interface{}) {
-	typeName := c.getType(no, v)
-	code := "type J2S" + strconv.Itoa(no) + " " + typeName
-	c.append(no, code)
 }
 
 func (c *converter) getType(no int, v interface{}) string {
@@ -103,7 +97,7 @@ func (c *converter) getStructType(no int, v map[string]interface{}) string {
 		typeStr := c.getType(nextNo, v[key])
 		if strings.HasPrefix(typeStr, "struct {") {
 			structName := "J2S" + strconv.Itoa(nextNo)
-			c.append(nextNo, "type "+structName+" "+typeStr)
+			c.append(nextNo, typeStr)
 			typeStr = structName
 		}
 		buf.WriteString(c.structField(key) + " " + typeStr)
@@ -143,10 +137,7 @@ func (c *converter) getSliceType(no int, v []interface{}) string {
 				nextNo++
 			}
 
-			typeStr := c.getType(nextNo, vvv)
-			structName := "J2S" + strconv.Itoa(nextNo)
-			c.append(nextNo, "type "+structName+" "+typeStr)
-
+			c.append(nextNo, c.getType(nextNo, vvv))
 			t = "J2S" + strconv.Itoa(nextNo)
 		case []interface{}:
 			t = c.getSliceType(no+1, vvv)
@@ -168,7 +159,7 @@ func (c *converter) getSliceType(no int, v []interface{}) string {
 func (c *converter) toString() (string, error) {
 	codes := make([]string, len(c.types))
 	for _, ti := range c.types {
-		codes[ti.no-1] = ti.code
+		codes[ti.no-1] = "type J2S" + strconv.Itoa(ti.no) + " " + ti.typeStr
 	}
 
 	code := strings.Join(codes, "\n\n")

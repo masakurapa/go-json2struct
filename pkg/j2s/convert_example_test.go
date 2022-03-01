@@ -13,7 +13,7 @@ func ExampleConvert() {
 		"CamelCase": true,
 		"kebab-case": null,
 		"map": {"child1": "apple", "child2": 12345},
-		"slice": ["1", "2", "3", "4", "5"]
+		"array": ["1", "2", "3", "4", "5"]
 	}`
 
 	output, err := j2s.Convert(input)
@@ -25,9 +25,9 @@ func ExampleConvert() {
 
 	// Output: type J2S1 struct {
 	// 	CamelCase bool        `json:"CamelCase"`
+	// 	Array     []string    `json:"array"`
 	// 	KebabCase interface{} `json:"kebab-case"`
 	// 	Map       J2S2        `json:"map"`
-	// 	Slice     []string    `json:"slice"`
 	// 	SnakeCase int         `json:"snake_case"`
 	// 	Title     string      `json:"title"`
 	// }

@@ -5,6 +5,8 @@ The web application is available at [here](https://masakurapa.github.io/go-json2
 
 ## Example for use as a module
 
+Check [pkg.go.dev](https://pkg.go.dev/github.com/masakurapa/go-json2struct/pkg/j2s) for examples.
+
 ```sh
 $ go get -u github.com/masakurapa/go-json2struct
 ```

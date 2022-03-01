@@ -43,31 +43,31 @@ type typeInfo struct {
 }
 
 func (c *converter) toStruct(v interface{}) (string, error) {
-	c.append(firstNo, c.getType(firstNo, v))
+	c.append(c.getTypeInfo(firstNo, v))
 	return c.toString()
 }
 
-func (c *converter) append(no int, typeStr string) {
-	c.types = append(c.types, typeInfo{
-		no:      no,
-		typeStr: typeStr,
-	})
+func (c *converter) append(v typeInfo) {
+	c.types = append(c.types, v)
 }
 
-func (c *converter) getType(no int, v interface{}) string {
+func (c *converter) getTypeInfo(no int, v interface{}) typeInfo {
+	ti := typeInfo{no: no}
 	switch vv := v.(type) {
 	case bool:
-		return "bool"
+		ti.typeStr = "bool"
 	case string:
-		return "string"
+		ti.typeStr = "string"
 	case float64:
-		return c.getNumberTyp(vv)
+		ti.typeStr = c.getNumberTyp(vv)
 	case map[string]interface{}:
-		return c.getStructType(no, vv)
+		ti.typeStr = c.getStructType(no, vv)
 	case []interface{}:
-		return c.getSliceType(no, vv)
+		ti.typeStr = c.getSliceType(no, vv)
+	default:
+		ti.typeStr = "interface{}"
 	}
-	return "interface{}"
+	return ti
 }
 
 func (c *converter) getNumberTyp(v float64) string {
@@ -94,10 +94,11 @@ func (c *converter) getStructType(no int, v map[string]interface{}) string {
 
 	for _, key := range keys {
 		nextNo := no + 1
-		typeStr := c.getType(nextNo, v[key])
+		ti := c.getTypeInfo(nextNo, v[key])
+		typeStr := ti.typeStr
 		if strings.HasPrefix(typeStr, "struct {") {
 			structName := "J2S" + strconv.Itoa(nextNo)
-			c.append(nextNo, typeStr)
+			c.append(ti)
 			typeStr = structName
 		}
 		buf.WriteString(c.structField(key) + " " + typeStr)
@@ -137,7 +138,7 @@ func (c *converter) getSliceType(no int, v []interface{}) string {
 				nextNo++
 			}
 
-			c.append(nextNo, c.getType(nextNo, vvv))
+			c.append(c.getTypeInfo(nextNo, vvv))
 			t = "J2S" + strconv.Itoa(nextNo)
 		case []interface{}:
 			t = c.getSliceType(no+1, vvv)

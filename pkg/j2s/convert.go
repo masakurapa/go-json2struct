@@ -50,6 +50,7 @@ type typeInfo struct {
 type structField struct {
 	name    string
 	typeStr string
+	isPtr   bool
 }
 
 func (c *converter) toStruct(v interface{}) (string, error) {
@@ -157,9 +158,25 @@ func (c *converter) getSliceType(no int, v []interface{}) string {
 }
 
 func (c *converter) toString() (string, error) {
-	codes := make([]string, len(c.types))
+	// grouping by same number
+	groups := make(map[int][]typeInfo)
 	for _, ti := range c.types {
-		code := "type J2S" + strconv.Itoa(ti.no) + " "
+		groups[ti.no] = append(groups[ti.no], ti)
+	}
+
+	codes := make([]string, len(c.types))
+	for no, tis := range groups {
+		code := "type J2S" + strconv.Itoa(no) + " "
+
+		var ti typeInfo
+		if len(tis) == 1 {
+			ti = tis[0]
+		} else {
+			// The only case that gets us here is a
+			// slice of a structure like `[{"test":"1"}, {"test":"2"}]`
+			ti = c.margeTypeInfo(no, tis)
+		}
+
 		if ti.isStruct {
 			code += c.toStructString(ti)
 		} else {
@@ -193,7 +210,13 @@ func (c *converter) toStructString(ti typeInfo) string {
 
 	for _, key := range keys {
 		field := fields[key]
-		buf.WriteString(c.structField(field.name) + " " + field.typeStr)
+		buf.WriteString(c.structField(field.name) + " ")
+
+		if field.isPtr {
+			buf.WriteString("*")
+		}
+		buf.WriteString(field.typeStr)
+
 		buf.WriteString(" `json:\"" + field.name + "\"`")
 		buf.WriteString("\n")
 	}
@@ -207,4 +230,46 @@ func (c *converter) structField(s string) string {
 		ss := strings.Replace(strings.Replace(s, "_", "", -1), "-", "", -1)
 		return strings.ToUpper(ss)
 	})
+}
+
+func (c *converter) margeTypeInfo(no int, tis []typeInfo) typeInfo {
+	type tmpFieldInfo struct {
+		cnt         int
+		structField structField
+	}
+	appended := make(map[string]tmpFieldInfo)
+
+	for _, ti := range tis {
+		for _, field := range ti.structFields {
+			tmp, ok := appended[field.name]
+			if !ok {
+				tmp = tmpFieldInfo{cnt: 1, structField: field}
+				appended[field.name] = tmp
+				continue
+			}
+
+			tmp.cnt++
+			if tmp.structField.typeStr != field.typeStr {
+				tmp.structField.typeStr = "interface{}"
+			}
+			appended[field.name] = tmp
+		}
+	}
+
+	// The element of slice is supposed to be a structure, so we'll set "isStruct" to true
+	ret := typeInfo{
+		no:           no,
+		isStruct:     true,
+		structFields: make([]structField, 0, len(appended)),
+	}
+	cnt := len(tis)
+
+	for _, tmp := range appended {
+		field := tmp.structField
+		// If there are N elements, it will be false only if the field appears in all elements.
+		field.isPtr = cnt != tmp.cnt
+		ret.structFields = append(ret.structFields, field)
+	}
+
+	return ret
 }

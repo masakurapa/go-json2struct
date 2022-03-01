@@ -171,6 +171,27 @@ type J2S2 struct {
 	Test string ` + "`json:\"test\"`" + `
 }`,
 		},
+		{
+			name: "slice - multiple map value1",
+			s:    `[{"test":"1"},{"test":"2","food":"apple"},{"test":"2","drink":"beer"}]`,
+			expected: `type J2S1 []J2S2
+
+type J2S2 struct {
+	Drink *string ` + "`json:\"drink\"`" + `
+	Food  *string ` + "`json:\"food\"`" + `
+	Test  string  ` + "`json:\"test\"`" + `
+}`,
+		},
+		{
+			name: "slice - multiple map value2",
+			s:    `[{"test":"1","food":""},{"test":2,"food":"apple"},{"food":null}]`,
+			expected: `type J2S1 []J2S2
+
+type J2S2 struct {
+	Food interface{}  ` + "`json:\"food\"`" + `
+	Test *interface{} ` + "`json:\"test\"`" + `
+}`,
+		},
 	}
 
 	for _, tc := range testCases {

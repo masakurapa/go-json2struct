@@ -38,7 +38,17 @@ type converter struct {
 }
 
 type typeInfo struct {
-	no      int
+	no int
+	// string of type
+	// not used for struct type
+	typeStr string
+
+	isStruct     bool
+	structFields []structField
+}
+
+type structField struct {
+	name    string
 	typeStr string
 }
 
@@ -81,44 +91,29 @@ func (c *converter) getNumberTyp(v float64) string {
 }
 
 func (c *converter) getStructTypeInfo(no int, v map[string]interface{}) typeInfo {
-	// sort by key name in asc
-	keys := make([]string, 0, len(v))
-	for key := range v {
-		keys = append(keys, key)
+	ti := typeInfo{
+		no:           no,
+		isStruct:     true,
+		structFields: make([]structField, 0, len(v)),
 	}
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i] < keys[j]
-	})
 
-	buf := bytes.Buffer{}
-	buf.WriteString("struct {\n")
-
-	ti := typeInfo{no: no}
-
-	for _, key := range keys {
+	for key, vv := range v {
 		nextNo := no + 1
-		fieldInfo := c.getTypeInfo(nextNo, v[key])
+		fieldInfo := c.getTypeInfo(nextNo, vv)
 		typeStr := fieldInfo.typeStr
-		if strings.HasPrefix(typeStr, "struct {") {
+		if fieldInfo.isStruct {
 			structName := "J2S" + strconv.Itoa(nextNo)
 			c.append(fieldInfo)
 			typeStr = structName
 		}
-		buf.WriteString(c.structField(key) + " " + typeStr)
-		buf.WriteString(" `json:\"" + key + "\"`")
-		buf.WriteString("\n")
+
+		ti.structFields = append(ti.structFields, structField{
+			name:    key,
+			typeStr: typeStr,
+		})
 	}
 
-	buf.WriteString("}")
-	ti.typeStr = buf.String()
 	return ti
-}
-
-func (c *converter) structField(s string) string {
-	return link.ReplaceAllStringFunc(s, func(s string) string {
-		ss := strings.Replace(strings.Replace(s, "_", "", -1), "-", "", -1)
-		return strings.ToUpper(ss)
-	})
 }
 
 func (c *converter) getSliceType(no int, v []interface{}) string {
@@ -164,7 +159,13 @@ func (c *converter) getSliceType(no int, v []interface{}) string {
 func (c *converter) toString() (string, error) {
 	codes := make([]string, len(c.types))
 	for _, ti := range c.types {
-		codes[ti.no-1] = "type J2S" + strconv.Itoa(ti.no) + " " + ti.typeStr
+		code := "type J2S" + strconv.Itoa(ti.no) + " "
+		if ti.isStruct {
+			code += c.toStructString(ti)
+		} else {
+			code += ti.typeStr
+		}
+		codes[ti.no-1] = code
 	}
 
 	code := strings.Join(codes, "\n\n")
@@ -173,4 +174,37 @@ func (c *converter) toString() (string, error) {
 		return "", errors.New("code format error: " + err.Error())
 	}
 	return strings.TrimSpace(string(b)), nil
+}
+
+func (c *converter) toStructString(ti typeInfo) string {
+	// sort by key name in asc
+	keys := make([]string, 0, len(ti.structFields))
+	fields := make(map[string]structField)
+	for _, field := range ti.structFields {
+		fields[field.name] = field
+		keys = append(keys, field.name)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+
+	buf := bytes.Buffer{}
+	buf.WriteString("struct {\n")
+
+	for _, key := range keys {
+		field := fields[key]
+		buf.WriteString(c.structField(field.name) + " " + field.typeStr)
+		buf.WriteString(" `json:\"" + field.name + "\"`")
+		buf.WriteString("\n")
+	}
+
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *converter) structField(s string) string {
+	return link.ReplaceAllStringFunc(s, func(s string) string {
+		ss := strings.Replace(strings.Replace(s, "_", "", -1), "-", "", -1)
+		return strings.ToUpper(ss)
+	})
 }

@@ -61,7 +61,8 @@ func (c *converter) getTypeInfo(no int, v interface{}) typeInfo {
 	case float64:
 		ti.typeStr = c.getNumberTyp(vv)
 	case map[string]interface{}:
-		ti.typeStr = c.getStructType(no, vv)
+		// overwrite "ti"
+		ti = c.getStructTypeInfo(no, vv)
 	case []interface{}:
 		ti.typeStr = c.getSliceType(no, vv)
 	default:
@@ -79,7 +80,7 @@ func (c *converter) getNumberTyp(v float64) string {
 	return "float64"
 }
 
-func (c *converter) getStructType(no int, v map[string]interface{}) string {
+func (c *converter) getStructTypeInfo(no int, v map[string]interface{}) typeInfo {
 	// sort by key name in asc
 	keys := make([]string, 0, len(v))
 	for key := range v {
@@ -92,13 +93,15 @@ func (c *converter) getStructType(no int, v map[string]interface{}) string {
 	buf := bytes.Buffer{}
 	buf.WriteString("struct {\n")
 
+	ti := typeInfo{no: no}
+
 	for _, key := range keys {
 		nextNo := no + 1
-		ti := c.getTypeInfo(nextNo, v[key])
-		typeStr := ti.typeStr
+		fieldInfo := c.getTypeInfo(nextNo, v[key])
+		typeStr := fieldInfo.typeStr
 		if strings.HasPrefix(typeStr, "struct {") {
 			structName := "J2S" + strconv.Itoa(nextNo)
-			c.append(ti)
+			c.append(fieldInfo)
 			typeStr = structName
 		}
 		buf.WriteString(c.structField(key) + " " + typeStr)
@@ -107,7 +110,8 @@ func (c *converter) getStructType(no int, v map[string]interface{}) string {
 	}
 
 	buf.WriteString("}")
-	return buf.String()
+	ti.typeStr = buf.String()
+	return ti
 }
 
 func (c *converter) structField(s string) string {

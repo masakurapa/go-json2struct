@@ -34,7 +34,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Build
-        run: make
+        run: |
+          make
+          sed -i -e "s/CURRENT_VERSION/${GITHUB_REF##*/}/" ./web/index.html
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:

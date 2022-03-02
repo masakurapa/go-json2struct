@@ -13,28 +13,69 @@ import (
 
 const (
 	firstNo = 1
+
+	boolType         = "bool"
+	stringType       = "string"
+	intType          = "int"
+	floatType        = "float64"
+	interfaceType    = "interface{}"
+	structNamePrefix = "J2S"
+
+	defaultTag = "json"
 )
 
 var (
 	link = regexp.MustCompile("(^[A-Za-z])|_([A-Za-z])|-([A-Za-z])")
 )
 
-// Convert returns a string that converts a JSON string into a Go structure.
+// Convert uses the default options and
+// returns a string of JSON strings converted to Go structures.
+//
+// The default values are as follows.
+//     Option {
+//         UseTag:  true,
+//         TagName: "json",
+//     }
 //
 // return an error if the string is invalid as JSON.
 func Convert(s string) (string, error) {
+	return ConvertWithOption(s, Option{
+		UseTag:  true,
+		TagName: defaultTag,
+	})
+}
+
+// ConvertWithOption uses the specified options and
+// returns a string that is a JSON string converted to a Go structure.
+//
+// return an error if the string is invalid as JSON.
+func ConvertWithOption(s string, opt Option) (string, error) {
 	var val interface{}
 	if err := json.Unmarshal([]byte(s), &val); err != nil {
 		// if you only have a string like "hoge", you will get an error here.
 		return "", errors.New("json unmarshal Error: " + err.Error())
 	}
 
-	conv := converter{}
+	conv := converter{opt: opt}
 	return conv.toStruct(val)
+}
+
+// Option is an option to customize output results
+type Option struct {
+	// UseTag outputs tag if true
+	UseTag bool
+
+	// TagName is a tag name. (default is "json")
+	//
+	// if empty, the default value is used.
+	//
+	// if "UseTag" is false, the value is not used.
+	TagName string
 }
 
 type converter struct {
 	types []typeInfo
+	opt   Option
 }
 
 type typeInfo struct {
@@ -66,9 +107,9 @@ func (c *converter) getTypeInfo(no int, v interface{}) typeInfo {
 	ti := typeInfo{no: no}
 	switch vv := v.(type) {
 	case bool:
-		ti.typeStr = "bool"
+		ti.typeStr = boolType
 	case string:
-		ti.typeStr = "string"
+		ti.typeStr = stringType
 	case float64:
 		ti.typeStr = c.getNumberTyp(vv)
 	case map[string]interface{}:
@@ -77,7 +118,7 @@ func (c *converter) getTypeInfo(no int, v interface{}) typeInfo {
 	case []interface{}:
 		ti.typeStr = c.getSliceType(no, vv)
 	default:
-		ti.typeStr = "interface{}"
+		ti.typeStr = interfaceType
 	}
 	return ti
 }
@@ -86,9 +127,9 @@ func (c *converter) getNumberTyp(v float64) string {
 	// TODO: there has to be a better way
 	s := strconv.FormatFloat(v, 'f', -1, 64)
 	if !strings.Contains(s, ".") {
-		return "int"
+		return intType
 	}
-	return "float64"
+	return floatType
 }
 
 func (c *converter) getStructTypeInfo(no int, v map[string]interface{}) typeInfo {
@@ -103,7 +144,7 @@ func (c *converter) getStructTypeInfo(no int, v map[string]interface{}) typeInfo
 		fieldInfo := c.getTypeInfo(nextNo, vv)
 		typeStr := fieldInfo.typeStr
 		if fieldInfo.isStruct {
-			structName := "J2S" + strconv.Itoa(nextNo)
+			structName := structNamePrefix + strconv.Itoa(nextNo)
 			c.append(fieldInfo)
 			typeStr = structName
 		}
@@ -119,17 +160,17 @@ func (c *converter) getStructTypeInfo(no int, v map[string]interface{}) typeInfo
 
 func (c *converter) getSliceType(no int, v []interface{}) string {
 	if len(v) == 0 {
-		return "[]interface{}"
+		return "[]" + interfaceType
 	}
 
 	ret := ""
 	for _, vv := range v {
-		t := "interface{}"
+		t := interfaceType
 		switch vvv := vv.(type) {
 		case bool:
-			t = "bool"
+			t = boolType
 		case string:
-			t = "string"
+			t = stringType
 		case float64:
 			t = c.getNumberTyp(vvv)
 		case map[string]interface{}:
@@ -139,7 +180,7 @@ func (c *converter) getSliceType(no int, v []interface{}) string {
 			}
 
 			c.append(c.getTypeInfo(nextNo, vvv))
-			t = "J2S" + strconv.Itoa(nextNo)
+			t = structNamePrefix + strconv.Itoa(nextNo)
 		case []interface{}:
 			t = c.getSliceType(no+1, vvv)
 		}
@@ -150,7 +191,7 @@ func (c *converter) getSliceType(no int, v []interface{}) string {
 		}
 
 		if ret != t {
-			ret = "interface{}"
+			ret = interfaceType
 			break
 		}
 	}
@@ -166,7 +207,7 @@ func (c *converter) toString() (string, error) {
 
 	codes := make([]string, len(c.types))
 	for no, tis := range groups {
-		code := "type J2S" + strconv.Itoa(no) + " "
+		code := "type " + structNamePrefix + strconv.Itoa(no) + " "
 
 		var ti typeInfo
 		if len(tis) == 1 {
@@ -217,7 +258,7 @@ func (c *converter) toStructString(ti typeInfo) string {
 		}
 		buf.WriteString(field.typeStr)
 
-		buf.WriteString(" `json:\"" + field.name + "\"`")
+		buf.WriteString(c.structTag(field.name))
 		buf.WriteString("\n")
 	}
 
@@ -230,6 +271,19 @@ func (c *converter) structField(s string) string {
 		ss := strings.Replace(strings.Replace(s, "_", "", -1), "-", "", -1)
 		return strings.ToUpper(ss)
 	})
+}
+
+func (c *converter) structTag(name string) string {
+	if !c.opt.UseTag {
+		return ""
+	}
+
+	tag := c.opt.TagName
+	if tag == "" {
+		tag = defaultTag
+	}
+
+	return "`" + tag + `:"` + name + "\"`"
 }
 
 func (c *converter) margeTypeInfo(no int, tis []typeInfo) typeInfo {
@@ -250,7 +304,7 @@ func (c *converter) margeTypeInfo(no int, tis []typeInfo) typeInfo {
 
 			tmp.cnt++
 			if tmp.structField.typeStr != field.typeStr {
-				tmp.structField.typeStr = "interface{}"
+				tmp.structField.typeStr = interfaceType
 			}
 			appended[field.name] = tmp
 		}

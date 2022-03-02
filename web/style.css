@@ -74,6 +74,36 @@ textarea:disabled {
   border-top: 0;
 }
 
+.about {
+  margin-top: 48px;
+  font-size: 0.8em;
+}
+.about p:first-child {
+  font-weight: bold;
+  font-size: 1em;
+}
+.indent1 {
+  text-indent: 1em;
+}
+.indent2 {
+  text-indent: 2em;
+}
+
+pre {
+  border-radius: 4px;
+  border: 1px solid #000000;
+  padding: 4px;
+  width: 360px;
+  margin-left: 2.5em;
+}
+pre[class="example-input"] {
+  background-color: #F5FFFA;
+}
+pre[class="example-output"] {
+  background-color: #f2f4f5;
+}
+
+
 footer {
   margin-top: auto;
   background-color: #659AD2;

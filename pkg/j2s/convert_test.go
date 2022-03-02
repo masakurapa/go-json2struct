@@ -251,9 +251,9 @@ func TestConvertWithOption(t *testing.T) {
 		},
 
 		{
-			name: "specify OmitemptyForAll for Omitempty",
+			name: "specify OmitemptyAlways for Omitempty",
 			s:    `{"test":"1"}`,
-			opt:  j2s.Option{UseTag: true, Omitempty: j2s.OmitemptyForAll},
+			opt:  j2s.Option{UseTag: true, Omitempty: j2s.OmitemptyAlways},
 			expected: `type J2S1 struct {
 	Test string ` + "`json:\"test,omitempty\"`" + `
 }`,
@@ -277,9 +277,9 @@ func TestConvertWithOption(t *testing.T) {
 		},
 
 		{
-			name: "slice of map - specify OmitemptyForAll for Omitempty",
+			name: "slice of map - specify OmitemptyAlways for Omitempty",
 			s:    `[{"test":"1"},{"test":"2","food":"apple"},{"test":"2","drink":"beer"}]`,
-			opt:  j2s.Option{UseTag: true, Omitempty: j2s.OmitemptyForAll},
+			opt:  j2s.Option{UseTag: true, Omitempty: j2s.OmitemptyAlways},
 			expected: `type J2S1 []J2S2
 
 type J2S2 struct {

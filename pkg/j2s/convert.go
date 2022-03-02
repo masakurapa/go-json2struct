@@ -31,8 +31,8 @@ type Omitempty int
 const (
 	// OmitemptyNone does not always output "omitempty"
 	OmitemptyNone Omitempty = iota
-	// OmitemptyForAll always output "omitempty"
-	OmitemptyForAll
+	// OmitemptyAlways always output "omitempty"
+	OmitemptyAlways
 	// OmitemptyPtrOnly outputs "omitempty" only if it is a pointer type
 	OmitemptyPtrOnly
 )
@@ -304,7 +304,7 @@ func (c *converter) structTag(field structField) string {
 	ret := "`" + tag + `:"` + field.name
 
 	switch c.opt.Omitempty {
-	case OmitemptyForAll:
+	case OmitemptyAlways:
 		ret += omitempty
 	case OmitemptyPtrOnly:
 		if field.isPtr {

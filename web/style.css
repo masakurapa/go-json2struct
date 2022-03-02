@@ -23,10 +23,15 @@ main {
 
 .options {
   margin-bottom: 16px;
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 8px;
 }
-
-.options label {
-  margin-right: 36px;
+.options label:nth-child(n + 2) {
+  margin-left: 36px;
+}
+.options div:nth-child(n + 2) {
+  margin-top: 16px;
 }
 
 button {

@@ -22,8 +22,16 @@
       </div>
 
       <div class="options">
-        <label for="use-tag"><input type="checkbox" id="use-tag" checked>Output Tag</label>
-        <label>Tag Name <input type="text" id="tag-name" value="json"></label>
+        <div>
+          <label for="use-tag"><input type="checkbox" id="use-tag" checked>Output Tag</label>
+          <label>Tag Name <input type="text" id="tag-name" value="json"></label>
+        </div>
+        <div>
+          Output "omitempty"
+          <label for="omitempty-none"><input type="radio" id="omitempty-none" name="omitempty" value="0" checked>None</label>
+          <label for="omitempty-always"><input type="radio" id="omitempty-always" name="omitempty" value="1">Always</label>
+          <label for="omitempty-ptr"><input type="radio" id="omitempty-ptr" name="omitempty" value="2">Pointer Only</label>
+        </div>
       </div>
 
       <div class="code">

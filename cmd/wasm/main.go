@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"strconv"
 	"syscall/js"
 
 	"github.com/masakurapa/go-json2struct/pkg/j2s"
@@ -22,8 +24,9 @@ func json2struct(js.Value, []js.Value) interface{} {
 	}
 
 	output, err := j2s.ConvertWithOption(input, j2s.Option{
-		UseTag:  doc.Call("getElementById", "use-tag").Get("checked").Bool(),
-		TagName: doc.Call("getElementById", "tag-name").Get("value").String(),
+		UseTag:    doc.Call("getElementById", "use-tag").Get("checked").Bool(),
+		TagName:   doc.Call("getElementById", "tag-name").Get("value").String(),
+		Omitempty: omitempty(&doc),
 	})
 
 	if err != nil {
@@ -38,4 +41,20 @@ func copyClipboard(js.Value, []js.Value) interface{} {
 	output := js.Global().Get("document").Call("getElementById", "output").Get("value").String()
 	js.Global().Get("navigator").Get("clipboard").Call("writeText", output)
 	return nil
+}
+
+func omitempty(doc *js.Value) j2s.Omitempty {
+	values := doc.Call("getElementsByName", "omitempty")
+	for i := 0; i < values.Length(); i++ {
+		idx := values.Index(i)
+		if idx.Get("checked").Bool() {
+			v, err := strconv.Atoi(idx.Get("value").String())
+			if err != nil {
+				fmt.Println(err)
+				break
+			}
+			return j2s.Omitempty(v)
+		}
+	}
+	return j2s.OmitemptyNone
 }

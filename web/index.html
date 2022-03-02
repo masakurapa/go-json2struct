@@ -1,4 +1,4 @@
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <title>JSON to Go Struct</title>
@@ -10,97 +10,29 @@
       });
     </script>
     <script src="https://kit.fontawesome.com/4e4a01a531.js"></script>
-
-    <style>
-      body {
-        margin: 0;
-      }
-
-      header {
-        background-color: #659AD2;
-        padding: 4px 0 4px 16px;
-        color: #FFFFFF;
-        font-size: 1.5em;
-        font-weight: bold;
-      }
-
-      .contents {
-        padding: 8px 24px 32px 24px;
-      }
-      .buttons {
-        margin-top: 8px;
-        margin-bottom: 16px;
-      }
-
-      button {
-        height: 32px;
-        border-radius: 4px;
-        margin-right: 16px;
-        cursor: pointer;
-        font-weight: bold;
-      }
-      #convert-btn {
-        background-color: #3388FF;
-        color: #FFFFFF;
-        width: 160px;
-      }
-
-      textarea {
-        width: 100%;
-        resize: vertical;
-        padding: 8px;
-        border: 1px solid black;
-      }
-      textarea:disabled {
-        border: 1px solid black;
-      }
-
-      #input {
-        background-color: #F5FFFA;
-        border-radius: 4px 4px 0 0;
-      }
-      #output {
-        background-color: #f2f4f5;
-        border-radius: 0 0 4px 4px;
-        border-top: 0;
-      }
-
-      footer {
-        margin-top: auto;
-        background-color: #659AD2;
-        text-align: center;
-        padding: 8px 0;
-        bottom: 0;
-      }
-
-      .copyright {
-        color: #fff;
-      }
-
-      .footer-link i {
-        position: relative;
-        top: 5px;
-        right: 5px;
-      }
-    </style>
+    <link rel='stylesheet' href='style.css'>
   </head>
   <body>
     <header>JSON to Go Struct</header>
 
-    <div class="contents">
+    <main>
       <div class="buttons">
-        <button id="convert-btn" onClick="json2struct()">Convert</button>
+        <button id="run-btn" onClick="json2struct()">Run</button>
         <button onClick="copyClipboard()">Copy</button>
+      </div>
+
+      <div class="options">
+        <label for="use-tag"><input type="checkbox" id="use-tag" checked>Output Tag</label>
+        <label>Tag Name <input type="text" id="tag-name" value="json"></label>
       </div>
 
       <div class="code">
         <textarea id="input" rows="10" placeholder='{"sample":"paste the json here"}'></textarea>
       </div>
-
       <div class="code">
         <textarea id="output" rows="20" disabled></textarea>
       </div>
-    </div>
+    </main>
 
     <footer>
       <div class="copyright">©2022 JSON to Go Struct</div>

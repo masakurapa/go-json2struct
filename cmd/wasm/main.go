@@ -14,21 +14,23 @@ func main() {
 }
 
 func json2struct(js.Value, []js.Value) interface{} {
-	input := js.Global().Get("document").Call("getElementById", "input").Get("value").String()
+	doc := js.Global().Get("document")
+	input := doc.Call("getElementById", "input").Get("value").String()
 	if input == "" {
 		// if there is no input, output samples with placeholder value
 		input = `{"sample":"paste the json here"}`
 	}
 
 	output, err := j2s.ConvertWithOption(input, j2s.Option{
-		UseTag: true,
+		UseTag:  doc.Call("getElementById", "use-tag").Get("checked").Bool(),
+		TagName: doc.Call("getElementById", "tag-name").Get("value").String(),
 	})
 
 	if err != nil {
-		js.Global().Get("document").Call("getElementById", "output").Set("value", err.Error())
+		doc.Call("getElementById", "output").Set("value", err.Error())
 		return nil
 	}
-	js.Global().Get("document").Call("getElementById", "output").Set("value", output)
+	doc.Call("getElementById", "output").Set("value", output)
 	return nil
 }
 

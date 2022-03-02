@@ -37,6 +37,7 @@ jobs:
         run: |
           make
           sed -i -e "s/CURRENT_VERSION/${GITHUB_REF##*/}/" ./web/index.html
+          sed -i -e "s/LASTMOD_DATE/`date +%Y-%m-%d`/" web/sitemap.xml
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:

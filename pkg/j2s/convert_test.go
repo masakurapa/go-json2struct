@@ -216,3 +216,60 @@ type J2S2 struct {
 		})
 	}
 }
+
+func TestConvertWithOption(t *testing.T) {
+	testCases := []struct {
+		name     string
+		s        string
+		opt      j2s.Option
+		expected string
+		err      error
+	}{
+		{
+			name: "UseTag is false",
+			s:    `{"test":"1"}`,
+			opt:  j2s.Option{UseTag: false, TagName: "example"},
+			expected: `type J2S1 struct {
+	Test string
+}`,
+		},
+		{
+			name: "TagName is empty string",
+			s:    `{"test":"1"}`,
+			opt:  j2s.Option{UseTag: true, TagName: ""},
+			expected: `type J2S1 struct {
+	Test string ` + "`json:\"test\"`" + `
+}`,
+		},
+		{
+			name: "specify non-json for TagName",
+			s:    `{"test":"1"}`,
+			opt:  j2s.Option{UseTag: true, TagName: "bson"},
+			expected: `type J2S1 struct {
+	Test string ` + "`bson:\"test\"`" + `
+}`,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := j2s.ConvertWithOption(tc.s, tc.opt)
+
+			if err == nil && tc.err == nil {
+				if actual != tc.expected {
+					t.Errorf("Convert() returns: \n%v\nwant: \n%v", actual, tc.expected)
+				}
+				return
+			}
+
+			if err != nil && tc.err != nil {
+				if err.Error() != tc.err.Error() {
+					t.Fatalf("error returns %v, want %v", err, tc.err)
+				}
+				return
+			}
+
+			t.Fatalf("error returns %v, want %v", err, tc.err)
+		})
+	}
+}

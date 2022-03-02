@@ -22,6 +22,19 @@ const (
 	structNamePrefix = "J2S"
 
 	defaultTag = "json"
+	omitempty  = ",omitempty"
+)
+
+// Omitempty is an optional type that outputs "omitempty"
+type Omitempty int
+
+const (
+	// OmitemptyNone does not always output "omitempty"
+	OmitemptyNone Omitempty = iota
+	// OmitemptyForAll always output "omitempty"
+	OmitemptyForAll
+	// OmitemptyPtrOnly outputs "omitempty" only if it is a pointer type
+	OmitemptyPtrOnly
 )
 
 var (
@@ -33,15 +46,17 @@ var (
 //
 // The default values are as follows.
 //     Option {
-//         UseTag:  true,
-//         TagName: "json",
+//         UseTag:    true,
+//         TagName:   "json",
+//         Omitempty: OmitemptyNone,
 //     }
 //
 // return an error if the string is invalid as JSON.
 func Convert(s string) (string, error) {
 	return ConvertWithOption(s, Option{
-		UseTag:  true,
-		TagName: defaultTag,
+		UseTag:    true,
+		TagName:   defaultTag,
+		Omitempty: OmitemptyNone,
 	})
 }
 
@@ -71,6 +86,9 @@ type Option struct {
 	//
 	// if "UseTag" is false, the value is not used.
 	TagName string
+
+	// Omitempty is an optional type that outputs "omitempty". (default is non output)
+	Omitempty Omitempty
 }
 
 type converter struct {
@@ -258,7 +276,7 @@ func (c *converter) toStructString(ti typeInfo) string {
 		}
 		buf.WriteString(field.typeStr)
 
-		buf.WriteString(c.structTag(field.name))
+		buf.WriteString(c.structTag(field))
 		buf.WriteString("\n")
 	}
 
@@ -273,7 +291,7 @@ func (c *converter) structField(s string) string {
 	})
 }
 
-func (c *converter) structTag(name string) string {
+func (c *converter) structTag(field structField) string {
 	if !c.opt.UseTag {
 		return ""
 	}
@@ -283,7 +301,18 @@ func (c *converter) structTag(name string) string {
 		tag = defaultTag
 	}
 
-	return "`" + tag + `:"` + name + "\"`"
+	ret := "`" + tag + `:"` + field.name
+
+	switch c.opt.Omitempty {
+	case OmitemptyForAll:
+		ret += omitempty
+	case OmitemptyPtrOnly:
+		if field.isPtr {
+			ret += omitempty
+		}
+	}
+
+	return ret + "\"`"
 }
 
 func (c *converter) margeTypeInfo(no int, tis []typeInfo) typeInfo {

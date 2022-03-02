@@ -249,6 +249,58 @@ func TestConvertWithOption(t *testing.T) {
 	Test string ` + "`bson:\"test\"`" + `
 }`,
 		},
+
+		{
+			name: "specify OmitemptyForAll for Omitempty",
+			s:    `{"test":"1"}`,
+			opt:  j2s.Option{UseTag: true, Omitempty: j2s.OmitemptyForAll},
+			expected: `type J2S1 struct {
+	Test string ` + "`json:\"test,omitempty\"`" + `
+}`,
+		},
+		{
+			name: "specify OmitemptyPtrOnly for Omitempty",
+			s:    `{"test":"1"}`,
+			opt:  j2s.Option{UseTag: true, Omitempty: j2s.OmitemptyPtrOnly},
+			// For simple structures, it is never a pointer, so it is not always output.
+			expected: `type J2S1 struct {
+	Test string ` + "`json:\"test\"`" + `
+}`,
+		},
+		{
+			name: "specify unknown value for Omitempty",
+			s:    `{"test":"1"}`,
+			opt:  j2s.Option{UseTag: true, Omitempty: 999},
+			expected: `type J2S1 struct {
+	Test string ` + "`json:\"test\"`" + `
+}`,
+		},
+
+		{
+			name: "slice of map - specify OmitemptyForAll for Omitempty",
+			s:    `[{"test":"1"},{"test":"2","food":"apple"},{"test":"2","drink":"beer"}]`,
+			opt:  j2s.Option{UseTag: true, Omitempty: j2s.OmitemptyForAll},
+			expected: `type J2S1 []J2S2
+
+type J2S2 struct {
+	Drink *string ` + "`json:\"drink,omitempty\"`" + `
+	Food  *string ` + "`json:\"food,omitempty\"`" + `
+	Test  string  ` + "`json:\"test,omitempty\"`" + `
+}`,
+		},
+
+		{
+			name: "slice of map - specify OmitemptyPtrOnly for Omitempty",
+			s:    `[{"test":"1"},{"test":"2","food":"apple"},{"test":"2","drink":"beer"}]`,
+			opt:  j2s.Option{UseTag: true, Omitempty: j2s.OmitemptyPtrOnly},
+			expected: `type J2S1 []J2S2
+
+type J2S2 struct {
+	Drink *string ` + "`json:\"drink,omitempty\"`" + `
+	Food  *string ` + "`json:\"food,omitempty\"`" + `
+	Test  string  ` + "`json:\"test\"`" + `
+}`,
+		},
 	}
 
 	for _, tc := range testCases {
